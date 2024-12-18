@@ -1,10 +1,12 @@
+
 streamlit
 speechrecognition
-requests
 langchain
-chromadb
-langchain-groq
 langchain-community
-python-dotenv
-transformers
+langchain-groq
+chromadb
 sentence-transformers
+transformers
+requests
+pyaudio
+python-dotenv
