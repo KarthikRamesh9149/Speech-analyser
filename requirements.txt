@@ -4,6 +4,6 @@ requests
 langchain
 chromadb
 langchain-groq
+langchain-community
 python-dotenv
 transformers
-langchain-community
