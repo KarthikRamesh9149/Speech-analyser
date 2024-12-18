@@ -1,6 +1,7 @@
 # Import necessary libraries
 import streamlit as st
 import speech_recognition as sr
+from st_audiorec import st_audiorec  # Audio recording for Streamlit
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.vectorstores import Chroma
 from langchain.embeddings import HuggingFaceEmbeddings
@@ -37,18 +38,23 @@ recognizer = sr.Recognizer()
 TAVILY_API_KEY = "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"
 
 # Helper Functions
-def transcribe_audio(speaker):
-    """Capture and transcribe speech using Google API."""
-    with sr.Microphone() as source:
-        st.info(f"{speaker} is speaking...")
-        try:
-            audio = recognizer.listen(source, timeout=5)
-            transcription = recognizer.recognize_google(audio)
+def transcribe_audio(audio_bytes, speaker):
+    """Capture and transcribe recorded audio."""
+    try:
+        temp_audio_path = f"temp_{speaker}.wav"
+        with open(temp_audio_path, "wb") as f:
+            f.write(audio_bytes)
+        with sr.AudioFile(temp_audio_path) as source:
+            audio_data = recognizer.record(source)
+            transcription = recognizer.recognize_google(audio_data)
             st.success(f"{speaker} said: {transcription}")
             return transcription
-        except Exception:
-            st.error("Speech could not be processed.")
-            return None
+    except sr.UnknownValueError:
+        st.error(f"Could not understand {speaker}'s audio.")
+        return None
+    except sr.RequestError:
+        st.error("Speech Recognition service is unavailable.")
+        return None
 
 def identify_question(text):
     """Identify embedded questions in text."""
@@ -113,15 +119,17 @@ vector_store = st.session_state.vector_store
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("🎤 Speaker 1")
-    if st.button("Record for Speaker 1"):
-        text = transcribe_audio("Speaker 1")
+    audio_bytes = st_audiorec()
+    if audio_bytes:
+        text = transcribe_audio(audio_bytes, "Speaker 1")
         if text:
             st.session_state.conversation.append(("Speaker 1", text))
 
 with col2:
     st.subheader("🎤 Speaker 2")
-    if st.button("Record for Speaker 2"):
-        text = transcribe_audio("Speaker 2")
+    audio_bytes = st_audiorec()
+    if audio_bytes:
+        text = transcribe_audio(audio_bytes, "Speaker 2")
         if text:
             st.session_state.conversation.append(("Speaker 2", text))
 
