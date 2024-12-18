@@ -8,5 +8,5 @@ chromadb
 sentence-transformers
 transformers
 requests
-pyaudio
+streamlit-audio-recorder
 python-dotenv
